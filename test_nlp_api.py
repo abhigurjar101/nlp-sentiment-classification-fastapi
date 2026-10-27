@@ -40,7 +40,7 @@ def main():
         print(f"  • Category:   {res['category']}")
 
     print("\n" + "=" * 80)
-    print("✅ All NLP microservice tests passed successfully!")
+    print("Demo complete. Run python -m unittest discover -s tests -v for assertions.")
     print("=" * 80)
 
 
