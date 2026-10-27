@@ -1,14 +1,14 @@
-from transformers import pipeline
+import os
+import re
 
 class NLPModel:
     def __init__(self):
-        try:
-            print("Loading ML model (this may take a moment if not cached)...")
+        self.summarizer = None
+        self.mode = "extractive"
+        if os.environ.get("NLP_USE_TRANSFORMERS", "false").lower() == "true":
+            from transformers import pipeline
             self.summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
-            print("Model loaded successfully.")
-        except Exception as e:
-            print(f"[NOTE] Remote transformer download skipped ({e}). Operating in lightweight high-speed mode.")
-            self.summarizer = None
+            self.mode = "transformer"
 
     def summarize(self, text: str, max_length: int = 130, min_length: int = 30) -> str:
         if self.summarizer:
@@ -23,8 +23,9 @@ class NLPModel:
         positive_words = ["great", "excellent", "good", "amazing", "love", "outstanding", "fast", "efficient", "stellar"]
         negative_words = ["bad", "terrible", "poor", "slow", "hate", "bug", "broken", "worst", "fail"]
         
-        pos_hits = sum(1 for w in positive_words if w in lower)
-        neg_hits = sum(1 for w in negative_words if w in lower)
+        tokens = set(re.findall(r"\b[a-z]+\b", lower))
+        pos_hits = sum(1 for w in positive_words if w in tokens)
+        neg_hits = sum(1 for w in negative_words if w in tokens)
 
         if pos_hits > neg_hits:
             sentiment = "POSITIVE"

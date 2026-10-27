@@ -3,14 +3,15 @@ from app.schemas import SummarizeRequest, SummarizeResponse, SentimentRequest, S
 from app.models.ml_model import ml_pipeline
 
 app = FastAPI(
-    title="Production NLP Microservice",
-    description="High-throughput NLP API for Text Summarization, Multi-Class Sentiment Analysis, and Category Tagging.",
+    title="NLP API Demonstration",
+    description="Text summarization with a rule-based sentiment and category baseline.",
     version="1.0.0"
 )
 
 @app.get("/", tags=["Health"])
 def health_check():
-    return {"status": "ok", "message": "NLP microservice is online and model is loaded."}
+    return {"status": "ok", "summarization_mode": ml_pipeline.mode,
+            "sentiment_mode": "keyword_rules"}
 
 @app.post("/summarize", response_model=SummarizeResponse, tags=["NLP Operations"])
 def summarize_text(request: SummarizeRequest):
@@ -26,7 +27,7 @@ def summarize_text(request: SummarizeRequest):
             summary_length=len(summary_text)
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="NLP operation failed") from e
 
 @app.post("/analyze", response_model=SentimentResponse, tags=["NLP Operations"])
 def analyze_sentiment(request: SentimentRequest):
@@ -38,4 +39,4 @@ def analyze_sentiment(request: SentimentRequest):
             category=res["category"]
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="NLP operation failed") from e
